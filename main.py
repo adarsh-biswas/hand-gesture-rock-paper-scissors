@@ -3,28 +3,25 @@ import mediapipe as mp
 import random
 import time
 
-# Initialize MediaPipe Hand module
 mp_hands = mp.solutions.hands
 hands = mp_hands.Hands(max_num_hands=1, min_detection_confidence=0.7)
 mp_draw = mp.solutions.drawing_utils
 
-# Define gestures
 GESTURES = {
-    "rock": [0, 0, 0, 0, 0],  # All fingers down
-    "paper": [1, 1, 1, 1, 1],  # All fingers up
-    "scissors": [0, 1, 1, 0, 0],  # Index and middle fingers up
+    "rock": [0, 0, 0, 0, 0],
+    "paper": [1, 1, 1, 1, 1],
+    "scissors": [0, 1, 1, 0, 0],
 }
 
 def detect_gesture(hand_landmarks):
     finger_states = []
-    tip_ids = [4, 8, 12, 16, 20]  # Thumb, Index, Middle, Ring, Pinky
+    tip_ids = [4, 8, 12, 16, 20]
     for i, tip_id in enumerate(tip_ids):
-        # Check if a finger is up
-        if i == 0:  # Thumb
+        if i == 0:
             finger_states.append(
                 hand_landmarks.landmark[tip_id].x < hand_landmarks.landmark[tip_id - 1].x
             )
-        else:  # Other fingers
+        else:
             finger_states.append(
                 hand_landmarks.landmark[tip_id].y < hand_landmarks.landmark[tip_id - 2].y
             )
@@ -33,7 +30,6 @@ def detect_gesture(hand_landmarks):
             return gesture
     return "unknown"
 
-# Game logic
 def play_game():
     cap = cv2.VideoCapture(0)
     print("Starting Rock-Paper-Scissors game!")
@@ -45,7 +41,7 @@ def play_game():
         if not ret:
             break
 
-        frame = cv2.flip(frame, 1)  # Flip the frame horizontally
+        frame = cv2.flip(frame, 1)
         rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         result = hands.process(rgb_frame)
 
@@ -54,11 +50,9 @@ def play_game():
                 mp_draw.draw_landmarks(frame, hand_landmarks, mp_hands.HAND_CONNECTIONS)
                 user_move = detect_gesture(hand_landmarks)
                 if user_move != "unknown":
-                    # Get computer choice
                     computer_move = random.choice(list(GESTURES.keys()))
                     print(f"User: {user_move} | Computer: {computer_move}")
 
-                    # Determine the winner
                     if user_move == computer_move:
                         result_text = "It's a Tie!"
                     elif (user_move == "rock" and computer_move == "scissors") or \
@@ -68,7 +62,6 @@ def play_game():
                     else:
                         result_text = "You Lose!"
 
-                    # Display result on the screen
                     cv2.putText(frame, result_text, (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
                     print(result_text)
                     time.sleep(2)
@@ -83,3 +76,4 @@ def play_game():
 
 if _name_ == "_main_":
     play_game()
+
